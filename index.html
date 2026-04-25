@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TopUp & Voucher API — Docs v4.0.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d12;
+    --surface: #12151d;
+    --surface2: #1a1e2a;
+    --border: #252a38;
+    --accent: #4ade80;
+    --accent2: #38bdf8;
+    --accent3: #f59e0b;
+    --accent4: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0d1117;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; line-height: 1.6; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+  .layout { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+  .sidebar { width: 265px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 0 0 2rem; }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .logo { padding: 1.5rem 1.25rem 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+  .logo-badge { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; letter-spacing: 0.12em; color: var(--accent); background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); padding: 0.25rem 0.6rem; border-radius: 4px; margin-bottom: 0.5rem; }
+  .logo h1 { font-size: 1.05rem; font-weight: 800; color: var(--text); line-height: 1.2; }
+  .logo span { color: var(--accent); }
+  .nav-section { padding: 0 0.75rem; margin-bottom: 0.5rem; }
+  .nav-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; padding: 0.5rem 0.5rem 0.3rem; font-family: 'JetBrains Mono', monospace; }
+  .nav-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0.75rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; color: #94a3b8; cursor: pointer; transition: all 0.15s; text-decoration: none; border: none; background: none; width: 100%; text-align: left; }
+  .nav-link:hover { background: var(--surface2); color: var(--text); }
+  .nav-link.active { background: rgba(74,222,128,0.12); color: var(--accent); }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: var(--accent); } .dot-blue { background: var(--accent2); }
+  .dot-yellow { background: var(--accent3); } .dot-red { background: var(--accent4); }
+
+  .main { flex: 1; max-width: 880px; padding: 3rem 3rem 6rem; overflow-x: hidden; }
+  .section { margin-bottom: 4rem; animation: fadeUp 0.4s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .section-tag { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; font-family: 'JetBrains Mono', monospace; }
+  .section-title { font-size: 1.65rem; font-weight: 800; color: var(--text); margin-bottom: 0.75rem; line-height: 1.2; }
+  .section-desc { color: #94a3b8; font-size: 0.9rem; max-width: 620px; margin-bottom: 1.5rem; }
+
+  .endpoint-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; }
+  .endpoint-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+  .method { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 4px; letter-spacing: 0.05em; }
+  .method-get  { background: rgba(56,189,248,0.15); color: var(--accent2); border: 1px solid rgba(56,189,248,0.3); }
+  .method-post { background: rgba(74,222,128,0.12); color: var(--accent);  border: 1px solid rgba(74,222,128,0.25); }
+  .endpoint-path { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 600; color: var(--text); flex: 1; }
+  .endpoint-summary { font-size: 0.78rem; color: var(--muted); }
+  .endpoint-body { padding: 1.25rem; }
+
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.75; margin: 0.75rem 0; position: relative; }
+  pre::-webkit-scrollbar { height: 4px; }
+  pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .pre-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 0.35rem; }
+  .copy-btn { position: absolute; top: 0.75rem; right: 0.75rem; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 4px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; }
+  .copy-btn:hover { background: var(--surface); color: var(--text); }
+  .copy-btn.copied { color: var(--accent); border-color: rgba(74,222,128,0.4); }
+
+  .k { color: #f87171; } .s { color: #4ade80; } .n { color: #38bdf8; }
+  .b { color: #f59e0b; } .c { color: #4a5568; font-style: italic; } .p { color: #e2e8f0; }
+
+  .param-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.75rem 0; }
+  .param-table th { text-align: left; padding: 0.5rem 0.75rem; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
+  .param-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid rgba(37,42,56,0.5); vertical-align: top; }
+  .param-table tr:last-child td { border-bottom: none; }
+  .param-name { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600; color: var(--accent2); }
+  .param-type { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent3); }
+  .badge { display: inline-block; font-size: 0.6rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; padding: 0.1rem 0.4rem; border-radius: 3px; margin-left: 0.3rem; }
+  .badge-req  { background: rgba(248,113,113,0.15); color: var(--accent4); border: 1px solid rgba(248,113,113,0.3); }
+  .badge-opt  { background: rgba(100,116,139,0.15); color: var(--muted);   border: 1px solid rgba(100,116,139,0.3); }
+  .badge-cond { background: rgba(245,158,11,0.12);  color: var(--accent3); border: 1px solid rgba(245,158,11,0.3); }
+
+  .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin: 1rem 0; }
+  .status-card { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+  .status-icon { font-size: 1.2rem; margin-bottom: 0.4rem; }
+  .status-name { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.8rem; margin-bottom: 0.25rem; }
+  .status-desc { font-size: 0.75rem; color: var(--muted); }
+  .s-success { border-color: rgba(74,222,128,0.3); } .s-success .status-name { color: var(--accent); }
+  .s-failed  { border-color: rgba(248,113,113,0.3); } .s-failed .status-name  { color: var(--accent4); }
+  .s-partial { border-color: rgba(245,158,11,0.3); }  .s-partial .status-name { color: var(--accent3); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  .note   { background: rgba(56,189,248,0.06);  border: 1px solid rgba(56,189,248,0.2);  border-left: 3px solid var(--accent2); border-radius: 6px; padding: 0.85rem 1rem; font-size: 0.82rem; color: #94a3b8; margin: 1rem 0; }
+  .note strong { color: var(--accent2); }
+  .warn   { background: rgba(245,158,11,0.06);  border: 1px solid rgba(245,158,11,0.2);  border-left: 3px solid var(--accent3); border-radius: 6px; padding: 0.85rem 1rem; font-size: 0.82rem; color: #94a3b8; margin: 1rem 0; }
+  .warn strong { color: var(--accent3); }
+  .danger { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.2); border-left: 3px solid var(--accent4); border-radius: 6px; padding: 0.85rem 1rem; font-size: 0.82rem; color: #94a3b8; margin: 1rem 0; }
+  .danger strong { color: var(--accent4); }
+
+  .chip { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 3px; letter-spacing: 0.05em; margin: 0.15rem; }
+  .chip-green  { background: rgba(74,222,128,0.1);  color: var(--accent);  border: 1px solid rgba(74,222,128,0.25); }
+  .chip-blue   { background: rgba(56,189,248,0.1);  color: var(--accent2); border: 1px solid rgba(56,189,248,0.25); }
+  .chip-yellow { background: rgba(245,158,11,0.1);  color: var(--accent3); border: 1px solid rgba(245,158,11,0.25); }
+
+  .hero { padding: 2rem 0 2.5rem; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+  .hero-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+  .hero h1 { font-size: 2.4rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.75rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub { color: #64748b; font-size: 0.9rem; max-width: 520px; }
+  .base-url { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.25rem; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+  .base-url .label { color: var(--muted); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .base-url .url { color: var(--accent2); }
+
+  .backend-pill { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 0.25rem 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--muted); margin: 0.5rem 0 1rem; }
+  .backend-pill span { color: var(--accent2); }
+
+  h3.sub { font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin: 1.5rem 0 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+
+  .uc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin: 0.75rem 0; }
+  .uc-card { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem 1rem; }
+  .uc-amount { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; color: var(--accent3); margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+  .uc-row { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent2); margin-bottom: 0.2rem; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 1.5rem 1.25rem 4rem; }
+    .hero h1 { font-size: 1.6rem; }
+    .status-grid, .uc-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-badge">⬡ v4.0.0</div>
+      <h1>TopUp & Voucher<br><span>API Docs</span></h1>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Getting Started</div>
+      <a class="nav-link active" href="#overview"><span class="nav-dot dot-green"></span>Overview</a>
+      <a class="nav-link" href="#auth"><span class="nav-dot dot-blue"></span>Authentication</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Endpoints</div>
+      <a class="nav-link" href="#health"><span class="nav-dot dot-green"></span>Health Check</a>
+      <a class="nav-link" href="#topup"><span class="nav-dot dot-green"></span>POST /topup</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Order Types</div>
+      <a class="nav-link" href="#voucher"><span class="nav-dot dot-blue"></span>Voucher Orders</a>
+      <a class="nav-link" href="#shell-bd"><span class="nav-dot dot-yellow"></span>Shell BD</a>
+      <a class="nav-link" href="#shell-sg"><span class="nav-dot dot-yellow"></span>Shell SG</a>
+      <a class="nav-link" href="#shell-indo"><span class="nav-dot dot-yellow"></span>Shell INDO</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Callbacks</div>
+      <a class="nav-link" href="#callbacks"><span class="nav-dot dot-red"></span>Callback Formats</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Reference</div>
+      <a class="nav-link" href="#voucher-serials"><span class="nav-dot dot-blue"></span>UniPin Serials</a>
+      <a class="nav-link" href="#packages"><span class="nav-dot dot-blue"></span>Package Codes</a>
+      <a class="nav-link" href="#errors"><span class="nav-dot dot-red"></span>Error Codes</a>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- HERO -->
+    <div class="hero" id="overview">
+      <div class="hero-eyebrow">// API Reference</div>
+      <h1>TopUp & Voucher<br><span>API v4.0.0</span></h1>
+      <p class="hero-sub">Unified endpoint for Free Fire shell top-up and UniPin voucher redemption. Supports BD, SG, and INDO regions. All orders process asynchronously — results delivered via HTTP callback.</p>
+      <div class="base-url">
+        <span class="label">Base URL</span>
+        <span class="url">https://your-server.com</span>
+      </div>
+    </div>
+
+    <!-- AUTH -->
+    <div class="section" id="auth">
+      <div class="section-tag">// Authentication</div>
+      <div class="section-title">API Token</div>
+      <p class="section-desc">Every request must include a valid API token. Three methods are supported — the first found is used.</p>
+      <table class="param-table">
+        <thead><tr><th>Method</th><th>Where</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="param-name">Authorization Header</span></td>
+            <td style="color:#94a3b8">HTTP Header</td>
+            <td><code style="font-family:JetBrains Mono;font-size:0.75rem;color:#94a3b8">Authorization: Bearer your_token</code></td>
+          </tr>
+          <tr>
+            <td><span class="param-name">Query Parameter</span></td>
+            <td style="color:#94a3b8">URL Query</td>
+            <td><code style="font-family:JetBrains Mono;font-size:0.75rem;color:#94a3b8">?token=your_token</code></td>
+          </tr>
+          <tr>
+            <td><span class="param-name">Body Field</span></td>
+            <td style="color:#94a3b8">JSON Body</td>
+            <td><code style="font-family:JetBrains Mono;font-size:0.75rem;color:#94a3b8">"api_key": "your_token"</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- HEALTH -->
+    <div class="section" id="health">
+      <div class="section-tag">// Endpoint</div>
+      <div class="section-title">Health Check</div>
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method method-get">GET</span>
+          <span class="endpoint-path">/health</span>
+          <span class="endpoint-summary">No auth required</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="pre-label">Response</div>
+          <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"status"</span><span class="p">:</span>    <span class="s">"healthy"</span><span class="p">,</span>
+  <span class="k">"stats"</span><span class="p">:</span>    <span class="p">{</span> <span class="k">"success"</span><span class="p">:</span> <span class="n">1024</span><span class="p">,</span> <span class="k">"failed"</span><span class="p">:</span> <span class="n">12</span><span class="p">,</span> <span class="k">"total"</span><span class="p">:</span> <span class="n">1036</span> <span class="p">},</span>
+  <span class="k">"vps_nodes"</span><span class="p">:</span> <span class="n">7</span>
+<span class="p">}</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- POST /topup -->
+    <div class="section" id="topup">
+      <div class="section-tag">// Main Endpoint</div>
+      <div class="section-title">POST /topup</div>
+      <p class="section-desc">Single endpoint for all order types. Returns immediately with an accepted status. The actual top-up runs in the background — result is posted to your callback URL.</p>
+
+      <div class="danger"><strong>url is required.</strong> Without a callback URL you will not receive the order result. Always include your HTTPS endpoint in the <code style="font-family:JetBrains Mono;font-size:0.8rem">url</code> field.</div>
+
+      <h3 class="sub">Request Fields</h3>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="param-name">orderid</span> <span class="badge badge-req">required</span></td>
+            <td><span class="param-type">string</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">Your unique order identifier</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">playerid</span> <span class="badge badge-req">required</span></td>
+            <td><span class="param-type">string</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">Free Fire UID (min 8 digits for voucher orders)</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">code</span> <span class="badge badge-req">required</span></td>
+            <td><span class="param-type">string</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">Order type key: <code style="font-family:JetBrains Mono;font-size:0.75rem;color:#f59e0b">shell</code> / <code style="font-family:JetBrains Mono;font-size:0.75rem;color:#f59e0b">sgshell</code> / <code style="font-family:JetBrains Mono;font-size:0.75rem;color:#f59e0b">indo</code>, or voucher serial(s)</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">url</span> <span class="badge badge-req">required</span></td>
+            <td><span class="param-type">string</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">Your HTTPS callback URL to receive the order result</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">api_key</span> <span class="badge badge-cond">required*</span></td>
+            <td><span class="param-type">string</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">API token — or pass via Authorization header / query param</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">pacakge</span> <span class="badge badge-cond">shell only</span></td>
+            <td><span class="param-type">string</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">Package to purchase. Required for all shell orders. <strong style="color:#f87171">Spelling: <code style="font-family:JetBrains Mono;font-size:0.75rem">pacakge</code></strong> (intentional — keep it as-is)</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">qty</span> <span class="badge badge-opt">optional</span></td>
+            <td><span class="param-type">int 1–5</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">How many of the same shell package to buy in one order. Default <code style="font-family:JetBrains Mono;font-size:0.75rem;color:#38bdf8">1</code>, max <code style="font-family:JetBrains Mono;font-size:0.75rem;color:#38bdf8">5</code>. For vouchers, qty is set by the number of codes in the <code style="font-family:JetBrains Mono;font-size:0.75rem">code</code> field.</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">username</span> <span class="badge badge-opt">shell only</span></td>
+            <td><span class="param-type">string</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">Garena account username</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">password</span> <span class="badge badge-opt">shell only</span></td>
+            <td><span class="param-type">string</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">Garena account password</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">autocode</span> <span class="badge badge-opt">shell only</span></td>
+            <td><span class="param-type">string</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">TOTP 2FA secret key</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">metadata</span> <span class="badge badge-opt">optional</span></td>
+            <td><span class="param-type">object</span></td>
+            <td style="color:#94a3b8;font-size:0.8rem">Custom key-value pairs — forwarded unchanged in the callback</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub">Immediate Response</h3>
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"status"</span><span class="p">:</span>  <span class="s">"accepted"</span><span class="p">,</span>   <span class="c">// "accepted" for shell, "processing" for voucher</span>
+  <span class="k">"orderid"</span><span class="p">:</span> <span class="s">"ORD-001"</span><span class="p">,</span>
+  <span class="k">"message"</span><span class="p">:</span> <span class="s">"Processing Weekly Lite x1 on BD shop."</span>
+<span class="p">}</span></pre>
+    </div>
+
+    <hr>
+
+    <!-- VOUCHER -->
+    <div class="section" id="voucher">
+      <div class="section-tag">// Order Type</div>
+      <div class="section-title">Voucher Redemption</div>
+      <p class="section-desc">Redeem UniPin vouchers by Free Fire UID. Send one or up to 5 vouchers comma-separated in the <code style="font-family:JetBrains Mono;color:#4ade80;font-size:0.82rem">code</code> field.</p>
+
+      <div class="warn"><strong>Code format:</strong> <code style="font-family:JetBrains Mono;font-size:0.8rem">SERIAL:PIN</code> or <code style="font-family:JetBrains Mono;font-size:0.8rem">SERIAL PIN</code>. PIN must be exactly 16 digits (dashes are stripped automatically). For multiple vouchers, separate with commas. Max 5 per request.</div>
+
+      <h3 class="sub">Single Voucher</h3>
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"orderid"</span><span class="p">:</span>  <span class="s">"ORD-001"</span><span class="p">,</span>
+  <span class="k">"playerid"</span><span class="p">:</span> <span class="s">"123456789"</span><span class="p">,</span>
+  <span class="k">"code"</span><span class="p">:</span>     <span class="s">"BDMB-T-S-01488799:6413243937299114"</span><span class="p">,</span>
+  <span class="k">"api_key"</span><span class="p">:</span>  <span class="s">"your_token"</span><span class="p">,</span>
+  <span class="k">"url"</span><span class="p">:</span>      <span class="s">"https://your-site.com/callback"</span>
+<span class="p">}</span></pre>
+
+      <h3 class="sub">Multiple Vouchers (up to 5)</h3>
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"orderid"</span><span class="p">:</span>  <span class="s">"ORD-002"</span><span class="p">,</span>
+  <span class="k">"playerid"</span><span class="p">:</span> <span class="s">"123456789"</span><span class="p">,</span>
+  <span class="k">"code"</span><span class="p">:</span>     <span class="s">"BDMB-T-S-01488799:6413243937299114, UPBD-Q-S-01565164:6443465646246675"</span><span class="p">,</span>
+  <span class="k">"api_key"</span><span class="p">:</span>  <span class="s">"your_token"</span><span class="p">,</span>
+  <span class="k">"url"</span><span class="p">:</span>      <span class="s">"https://your-site.com/callback"</span>
+<span class="p">}</span></pre>
+    </div>
+
+    <!-- SHELL BD -->
+    <div class="section" id="shell-bd">
+      <div class="section-tag">// Order Type</div>
+      <div class="section-title">Shell Top-Up — BD</div>
+      <div class="backend-pill">Backend: <span>bdgamebazar.com</span></div>
+
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"orderid"</span><span class="p">:</span>   <span class="s">"ORD-003"</span><span class="p">,</span>
+  <span class="k">"playerid"</span><span class="p">:</span>  <span class="s">"123456789"</span><span class="p">,</span>
+  <span class="k">"code"</span><span class="p">:</span>      <span class="s">"shell"</span><span class="p">,</span>
+  <span class="k">"pacakge"</span><span class="p">:</span>   <span class="s">"LITE"</span><span class="p">,</span>
+  <span class="k">"qty"</span><span class="p">:</span>       <span class="n">1</span><span class="p">,</span>
+  <span class="k">"username"</span><span class="p">:</span>  <span class="s">"garena_user"</span><span class="p">,</span>
+  <span class="k">"password"</span><span class="p">:</span>  <span class="s">"garena_pass"</span><span class="p">,</span>
+  <span class="k">"autocode"</span><span class="p">:</span>  <span class="s">"TOTP_SECRET"</span><span class="p">,</span>
+  <span class="k">"api_key"</span><span class="p">:</span>   <span class="s">"your_token"</span><span class="p">,</span>
+  <span class="k">"url"</span><span class="p">:</span>       <span class="s">"https://your-site.com/callback"</span>
+<span class="p">}</span></pre>
+
+      <h3 class="sub">Available Packages — BD</h3>
+      <table class="param-table">
+        <thead><tr><th>pacakge value</th><th>Item</th></tr></thead>
+        <tbody>
+          <tr><td><span class="param-name">LITE</span></td><td style="color:#94a3b8">Weekly Lite</td></tr>
+          <tr><td><span class="param-name">3D</span></td><td style="color:#94a3b8">Evo 3D</td></tr>
+          <tr><td><span class="param-name">7D</span></td><td style="color:#94a3b8">Evo 7D</td></tr>
+          <tr><td><span class="param-name">30D</span></td><td style="color:#94a3b8">Evo 30D</td></tr>
+          <tr><td><span class="param-name">108588</span></td><td style="color:#94a3b8">Level Up – Lvl 6</td></tr>
+          <tr><td><span class="param-name">108589</span></td><td style="color:#94a3b8">Level Up – Lvl 10</td></tr>
+          <tr><td><span class="param-name">108590</span></td><td style="color:#94a3b8">Level Up – Lvl 15</td></tr>
+          <tr><td><span class="param-name">108591</span></td><td style="color:#94a3b8">Level Up – Lvl 20</td></tr>
+          <tr><td><span class="param-name">108592</span></td><td style="color:#94a3b8">Level Up – Lvl 25</td></tr>
+          <tr><td><span class="param-name">108593</span></td><td style="color:#94a3b8">Level Up – Lvl 30</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SHELL SG -->
+    <div class="section" id="shell-sg">
+      <div class="section-tag">// Order Type</div>
+      <div class="section-title">Shell Top-Up — SG</div>
+      <div class="backend-pill">Backend: <span>shop.garena.sg</span></div>
+
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"orderid"</span><span class="p">:</span>   <span class="s">"ORD-004"</span><span class="p">,</span>
+  <span class="k">"playerid"</span><span class="p">:</span>  <span class="s">"123456789"</span><span class="p">,</span>
+  <span class="k">"code"</span><span class="p">:</span>      <span class="s">"sgshell"</span><span class="p">,</span>
+  <span class="k">"pacakge"</span><span class="p">:</span>   <span class="s">"LITE"</span><span class="p">,</span>
+  <span class="k">"qty"</span><span class="p">:</span>       <span class="n">1</span><span class="p">,</span>
+  <span class="k">"api_key"</span><span class="p">:</span>   <span class="s">"your_token"</span><span class="p">,</span>
+  <span class="k">"url"</span><span class="p">:</span>       <span class="s">"https://your-site.com/callback"</span>
+<span class="p">}</span></pre>
+
+      <h3 class="sub">Available Packages — SG</h3>
+      <div style="margin-bottom:0.75rem">
+        <span class="chip chip-blue">LITE</span>
+        <span class="chip chip-blue">30D</span>
+      </div>
+      <div class="note"><strong>SG shop supports only 2 packages.</strong> Sending any other package code will return a 400 error.</div>
+    </div>
+
+    <!-- SHELL INDO -->
+    <div class="section" id="shell-indo">
+      <div class="section-tag">// Order Type</div>
+      <div class="section-title">Shell Top-Up — INDO</div>
+      <div class="backend-pill">Backend: <span>kiosgamer.co.id</span></div>
+
+      <div class="warn"><strong>Field spelling:</strong> Use <code style="font-family:JetBrains Mono;font-size:0.8rem">pacakge</code> (same as BD/SG — intentional typo in the API).</div>
+
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"orderid"</span><span class="p">:</span>   <span class="s">"ORD-005"</span><span class="p">,</span>
+  <span class="k">"playerid"</span><span class="p">:</span>  <span class="s">"123456789"</span><span class="p">,</span>
+  <span class="k">"code"</span><span class="p">:</span>      <span class="s">"indo"</span><span class="p">,</span>
+  <span class="k">"pacakge"</span><span class="p">:</span>   <span class="s">"weekly"</span><span class="p">,</span>
+  <span class="k">"qty"</span><span class="p">:</span>       <span class="n">1</span><span class="p">,</span>
+  <span class="k">"api_key"</span><span class="p">:</span>   <span class="s">"your_token"</span><span class="p">,</span>
+  <span class="k">"url"</span><span class="p">:</span>       <span class="s">"https://your-site.com/callback"</span>
+<span class="p">}</span></pre>
+
+      <h3 class="sub">Available Packages — INDO</h3>
+      <table class="param-table">
+        <thead><tr><th>pacakge value</th><th>Item</th></tr></thead>
+        <tbody>
+          <tr><td><span class="param-name">5</span></td><td style="color:#94a3b8">5 Diamond</td></tr>
+          <tr><td><span class="param-name">50</span></td><td style="color:#94a3b8">50 Diamond</td></tr>
+          <tr><td><span class="param-name">70</span></td><td style="color:#94a3b8">70 Diamond</td></tr>
+          <tr><td><span class="param-name">140</span></td><td style="color:#94a3b8">140 Diamond</td></tr>
+          <tr><td><span class="param-name">355</span></td><td style="color:#94a3b8">355 Diamond</td></tr>
+          <tr><td><span class="param-name">720</span></td><td style="color:#94a3b8">720 Diamond</td></tr>
+          <tr><td><span class="param-name">7290</span></td><td style="color:#94a3b8">7290 Diamond</td></tr>
+          <tr><td><span class="param-name">36500</span></td><td style="color:#94a3b8">36500 Diamond</td></tr>
+          <tr><td><span class="param-name">73100</span></td><td style="color:#94a3b8">73100 Diamond</td></tr>
+          <tr><td><span class="param-name">weekly</span></td><td style="color:#94a3b8">Weekly Pass</td></tr>
+          <tr><td><span class="param-name">monthly</span></td><td style="color:#94a3b8">Monthly Pass</td></tr>
+          <tr><td><span class="param-name">BP</span></td><td style="color:#94a3b8">BP Card</td></tr>
+          <tr><td><span class="param-name">lvl6</span></td><td style="color:#94a3b8">Level Up – Lvl 6</td></tr>
+          <tr><td><span class="param-name">lvl10</span></td><td style="color:#94a3b8">Level Up – Lvl 10</td></tr>
+          <tr><td><span class="param-name">lvl15</span></td><td style="color:#94a3b8">Level Up – Lvl 15</td></tr>
+          <tr><td><span class="param-name">lvl20</span></td><td style="color:#94a3b8">Level Up – Lvl 20</td></tr>
+          <tr><td><span class="param-name">lvl25</span></td><td style="color:#94a3b8">Level Up – Lvl 25</td></tr>
+          <tr><td><span class="param-name">lvl30</span></td><td style="color:#94a3b8">Level Up – Lvl 30</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr>
+
+    <!-- CALLBACKS -->
+    <div class="section" id="callbacks">
+      <div class="section-tag">// Callbacks</div>
+      <div class="section-title">Callback Formats</div>
+      <p class="section-desc">When an order completes, the API POSTs JSON to your <code style="font-family:JetBrains Mono;color:#4ade80;font-size:0.82rem">url</code>. Your server must respond with HTTP 200.</p>
+
+      <div class="status-grid">
+        <div class="status-card s-success"><div class="status-icon">✅</div><div class="status-name">success</div><div class="status-desc">All items completed successfully</div></div>
+        <div class="status-card s-failed"><div class="status-icon">❌</div><div class="status-name">failed</div><div class="status-desc">All items failed</div></div>
+        <div class="status-card s-partial"><div class="status-icon">⚠️</div><div class="status-name">partial</div><div class="status-desc">Mixed — some ok, some failed</div></div>
+      </div>
+
+      <h3 class="sub">Voucher — Single Success</h3>
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"status"</span><span class="p">:</span>   <span class="s">"success"</span><span class="p">,</span>
+  <span class="k">"orderid"</span><span class="p">:</span>  <span class="s">"ORD-001"</span><span class="p">,</span>
+  <span class="k">"nickname"</span><span class="p">:</span> <span class="s">"PlayerName"</span><span class="p">,</span>
+  <span class="k">"content"</span><span class="p">:</span>  <span class="s">"✅ BDMB-T-S-01488799 6413-2439-3729-9114 (Weekly Lite)"</span>
+<span class="p">}</span></pre>
+
+      <h3 class="sub">Voucher — Single Failed</h3>
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"status"</span><span class="p">:</span>   <span class="s">"failed"</span><span class="p">,</span>
+  <span class="k">"orderid"</span><span class="p">:</span>  <span class="s">"ORD-001"</span><span class="p">,</span>
+  <span class="k">"nickname"</span><span class="p">:</span> <span class="s">"N/A"</span><span class="p">,</span>
+  <span class="k">"content"</span><span class="p">:</span>  <span class="s">"❌ BDMB-T-S-01488799 — Voucher already used"</span>
+<span class="p">}</span></pre>
+
+      <h3 class="sub">Voucher — Multi / Partial</h3>
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"status"</span><span class="p">:</span>   <span class="s">"partial"</span><span class="p">,</span>
+  <span class="k">"orderid"</span><span class="p">:</span>  <span class="s">"ORD-002"</span><span class="p">,</span>
+  <span class="k">"nickname"</span><span class="p">:</span> <span class="s">"PlayerName"</span><span class="p">,</span>
+  <span class="k">"content"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="k">"batch"</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span> <span class="k">"uc"</span><span class="p">:</span> <span class="s">"BDMB-T-S-01488799 6413-2439-3729-9114"</span><span class="p">,</span> <span class="k">"ok"</span><span class="p">:</span> <span class="b">true</span><span class="p">,</span>  <span class="k">"detail"</span><span class="p">:</span> <span class="s">"✅ Success"</span> <span class="p">},</span>
+      <span class="p">{</span> <span class="k">"uc"</span><span class="p">:</span> <span class="s">"UPBD-Q-S-01565164 6443-4656-4624-6675"</span><span class="p">,</span> <span class="k">"ok"</span><span class="p">:</span> <span class="b">false</span><span class="p">,</span> <span class="k">"detail"</span><span class="p">:</span> <span class="s">"❌ Invalid voucher"</span> <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span></pre>
+
+      <h3 class="sub">Shell — Success</h3>
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"status"</span><span class="p">:</span>   <span class="s">"success"</span><span class="p">,</span>
+  <span class="k">"orderid"</span><span class="p">:</span>  <span class="s">"ORD-003"</span><span class="p">,</span>
+  <span class="k">"nickname"</span><span class="p">:</span> <span class="s">"PlayerName"</span><span class="p">,</span>
+  <span class="k">"content"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="k">"batch"</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span> <span class="k">"package"</span><span class="p">:</span> <span class="s">"LITE"</span><span class="p">,</span> <span class="k">"ok"</span><span class="p">:</span> <span class="b">true</span><span class="p">,</span> <span class="k">"detail"</span><span class="p">:</span> <span class="s">"Purchase successful"</span> <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span></pre>
+
+      <h3 class="sub">Shell — Failed</h3>
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"status"</span><span class="p">:</span>   <span class="s">"failed"</span><span class="p">,</span>
+  <span class="k">"orderid"</span><span class="p">:</span>  <span class="s">"ORD-003"</span><span class="p">,</span>
+  <span class="k">"nickname"</span><span class="p">:</span> <span class="s">"N/A"</span><span class="p">,</span>
+  <span class="k">"content"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="k">"batch"</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span> <span class="k">"package"</span><span class="p">:</span> <span class="s">"LITE"</span><span class="p">,</span> <span class="k">"ok"</span><span class="p">:</span> <span class="b">false</span><span class="p">,</span> <span class="k">"detail"</span><span class="p">:</span> <span class="s">"Insufficient balance"</span> <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span></pre>
+
+      <h3 class="sub">With Metadata (any type)</h3>
+      <div class="note"><strong>Metadata pass-through:</strong> Any <code style="font-family:JetBrains Mono;font-size:0.8rem">metadata</code> object sent in the request is forwarded unchanged in the callback payload.</div>
+      <pre><button class="copy-btn" onclick="copyCode(this)">copy</button><span class="p">{</span>
+  <span class="k">"status"</span><span class="p">:</span>   <span class="s">"success"</span><span class="p">,</span>
+  <span class="k">"orderid"</span><span class="p">:</span>  <span class="s">"ORD-010"</span><span class="p">,</span>
+  <span class="k">"nickname"</span><span class="p">:</span> <span class="s">"PlayerName"</span><span class="p">,</span>
+  <span class="k">"content"</span><span class="p">:</span>  <span class="s">"✅ BDMB-T-S-01488799 6413-2439-3729-9114 (Weekly Lite)"</span><span class="p">,</span>
+  <span class="k">"metadata"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="k">"user_id"</span><span class="p">:</span> <span class="s">"usr_99"</span><span class="p">,</span>
+    <span class="k">"ref"</span><span class="p">:</span>     <span class="s">"TXN-XYZ"</span>
+  <span class="p">}</span>
+<span class="p">}</span></pre>
+    </div>
+
+    <hr>
+
+    <!-- UNIPIN SERIALS -->
+    <div class="section" id="voucher-serials">
+      <div class="section-tag">// Reference</div>
+      <div class="section-title">Supported UniPin Vouchers</div>
+      <p class="section-desc">All supported BD UniPin serial prefixes by UC amount. Both <code style="font-family:JetBrains Mono;color:#38bdf8;font-size:0.82rem">BDMB-</code> and <code style="font-family:JetBrains Mono;color:#38bdf8;font-size:0.82rem">UPBD-</code> prefixes are valid.</p>
+
+      <div class="uc-grid">
+        <div class="uc-card">
+          <div class="uc-amount">20 UC</div>
+          <div class="uc-row">BDMB-T-S-01488799</div>
+          <div class="uc-row">UPBD-Q-S-01565164</div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-amount">36 UC</div>
+          <div class="uc-row">BDMB-U-S-01159512</div>
+          <div class="uc-row">UPBD-R-S-01178354</div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-amount">80 UC</div>
+          <div class="uc-row">BDMB-J-S-02706712</div>
+          <div class="uc-row">UPBD-G-S-03534956</div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-amount">160 UC</div>
+          <div class="uc-row">BDMB-I-S-02948164</div>
+          <div class="uc-row">UPBD-F-S-02681253</div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-amount">161 UC</div>
+          <div class="uc-row">BDMB-Q-S-10569416</div>
+          <div class="uc-row">UPBD-N-S-10286673</div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-amount">405 UC</div>
+          <div class="uc-row">BDMB-K-S-01395384</div>
+          <div class="uc-row">UPBD-H-S-01367506</div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-amount">800 UC</div>
+          <div class="uc-row">BDMB-S-S-02652374</div>
+          <div class="uc-row">UPBD-P-S-02588125</div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-amount">810 UC</div>
+          <div class="uc-row">BDMB-L-S-00638814</div>
+          <div class="uc-row">UPBD-I-S-00618941</div>
+        </div>
+        <div class="uc-card" style="grid-column:span 2">
+          <div class="uc-amount">1625 UC</div>
+          <div class="uc-row">BDMB-M-S-00771035</div>
+          <div class="uc-row">UPBD-J-S-00698549</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACKAGES SUMMARY -->
+    <div class="section" id="packages">
+      <div class="section-tag">// Reference</div>
+      <div class="section-title">Package Codes Summary</div>
+      <table class="param-table">
+        <thead><tr><th>pacakge value</th><th>Region</th><th>Item</th></tr></thead>
+        <tbody>
+          <tr><td><span class="param-name">LITE</span></td><td><span class="chip chip-green">BD</span> <span class="chip chip-blue">SG</span></td><td style="color:#94a3b8">Weekly Lite</td></tr>
+          <tr><td><span class="param-name">3D</span></td><td><span class="chip chip-green">BD</span></td><td style="color:#94a3b8">Evo 3D</td></tr>
+          <tr><td><span class="param-name">7D</span></td><td><span class="chip chip-green">BD</span></td><td style="color:#94a3b8">Evo 7D</td></tr>
+          <tr><td><span class="param-name">30D</span></td><td><span class="chip chip-green">BD</span> <span class="chip chip-blue">SG</span></td><td style="color:#94a3b8">Evo 30D</td></tr>
+          <tr><td><span class="param-name">108588–108593</span></td><td><span class="chip chip-green">BD</span></td><td style="color:#94a3b8">Level Up Lvl 6–30</td></tr>
+          <tr><td><span class="param-name">5, 50, 70, 140, 355, 720, 7290, 36500, 73100</span></td><td><span class="chip chip-yellow">INDO</span></td><td style="color:#94a3b8">Diamond Packs</td></tr>
+          <tr><td><span class="param-name">weekly / monthly</span></td><td><span class="chip chip-yellow">INDO</span></td><td style="color:#94a3b8">Weekly / Monthly Pass</td></tr>
+          <tr><td><span class="param-name">BP</span></td><td><span class="chip chip-yellow">INDO</span></td><td style="color:#94a3b8">BP Card</td></tr>
+          <tr><td><span class="param-name">lvl6, lvl10, lvl15, lvl20, lvl25, lvl30</span></td><td><span class="chip chip-yellow">INDO</span></td><td style="color:#94a3b8">Level Up Packages</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ERRORS -->
+    <div class="section" id="errors">
+      <div class="section-tag">// Reference</div>
+      <div class="section-title">Error Codes</div>
+      <table class="param-table">
+        <thead><tr><th>HTTP</th><th>Meaning</th><th>Common Cause</th></tr></thead>
+        <tbody>
+          <tr><td><span style="font-family:JetBrains Mono;font-size:0.8rem;color:#f87171">401</span></td><td style="color:#e2e8f0">Unauthorized</td><td style="color:#94a3b8;font-size:0.8rem">Missing/invalid token or quota exceeded</td></tr>
+          <tr><td><span style="font-family:JetBrains Mono;font-size:0.8rem;color:#f87171">400</span></td><td style="color:#e2e8f0">Bad Request</td><td style="color:#94a3b8;font-size:0.8rem">Invalid playerid, malformed voucher, unknown package, region mismatch</td></tr>
+          <tr><td><span style="font-family:JetBrains Mono;font-size:0.8rem;color:#f59e0b">503</span></td><td style="color:#e2e8f0">Unavailable</td><td style="color:#94a3b8;font-size:0.8rem">Shell module not loaded on this instance</td></tr>
+          <tr><td><span style="font-family:JetBrains Mono;font-size:0.8rem;color:#f87171">500</span></td><td style="color:#e2e8f0">Server Error</td><td style="color:#94a3b8;font-size:0.8rem">Token verification failure or internal fault</td></tr>
+        </tbody>
+      </table>
+      <div class="note" style="margin-top:1.25rem">
+        <strong>Error shape:</strong>
+        <pre style="margin-top:0.5rem;background:transparent;border:none;padding:0"><span class="p">{</span> <span class="k">"detail"</span><span class="p">:</span> <span class="s">"Descriptive error message"</span> <span class="p">}</span></pre>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('pre');
+    const clone = pre.cloneNode(true);
+    clone.querySelectorAll('.copy-btn').forEach(b => b.remove());
+    navigator.clipboard.writeText(clone.innerText.trim()).then(() => {
+      btn.textContent = 'copied';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+  const sections = document.querySelectorAll('.section, .hero');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.target.id)
+        navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+    });
+  }, { threshold: 0.25 });
+  sections.forEach(s => { if (s.id) obs.observe(s); });
+</script>
+</body>
+  </html>
